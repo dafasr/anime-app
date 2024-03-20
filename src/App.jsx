@@ -42,19 +42,38 @@ const animesData = [
 ];
 
 export default function App() {
+  const [animes, setAnimes] = useState(animesData);
+  const [selectedAnime, setSelectedAnime] = useState(animes[0]);
+
+  function handleSelectedAnime(id) {
+    const newAnime = animes.filter((anime) => anime.mal_id === id);
+    setSelectedAnime(newAnime[0]);
+  }
+
   return (
     <>
-      <NavBar />
-      <Main />
+      <NavBar>
+        <Search>
+          <NumResult animes={animes} />
+        </Search>
+      </NavBar>
+      <Main>
+        <Box>
+          <AnimeList animes={animes} onSelectedAnime={handleSelectedAnime} />
+        </Box>
+        <Box>
+          <AnimeDetail selectedAnime={selectedAnime} />
+        </Box>
+      </Main>
     </>
   );
 }
 
-function NavBar() {
+function NavBar({ children }) {
   return (
     <nav className="nav-bar">
       <Logo />
-      <Search />
+      {children}
     </nav>
   );
 }
@@ -69,7 +88,7 @@ function Logo() {
   );
 }
 
-function Search() {
+function Search({ children }) {
   const [query, setQuery] = useState('');
 
   return (
@@ -81,48 +100,32 @@ function Search() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      <NumResult />
+      {children}
     </div>
   );
 }
 
-function NumResult() {
+function NumResult({ animes }) {
   return (
     <p className="search-results">
-      Found <strong>4</strong> results
+      Found <strong>{animes.length}</strong> results
     </p>
   );
 }
 
-function Main() {
-  const [animes, setAnimes] = useState(animesData);
-  const [selectedAnime, setSelectedAnime] = useState(animes[0]);
-
-  function handleSelectedAnime(id) {
-    const newAnime = animes.filter((anime) => anime.mal_id === id);
-    setSelectedAnime(newAnime[0]);
-  }
-
-  return (
-    <main className="main">
-      <ListBox animes={animes} onSelectedAnime={handleSelectedAnime} />
-      <SelectedBox selectedAnime={selectedAnime} />
-    </main>
-  );
+function Main({ children }) {
+  return <main className="main">{children}</main>;
 }
 
-function SelectedBox({ selectedAnime }) {
-  const [isOpen2, setIsOpen2] = useState(true);
+function Box({ children }) {
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="box">
-      <button
-        className="btn-toggle"
-        onClick={() => setIsOpen2((open) => !open)}
-      >
-        {isOpen2 ? '–' : '+'}
+      <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
+        {isOpen ? '–' : '+'}
       </button>
-      {isOpen2 && <AnimeDetail selectedAnime={selectedAnime} />}
+      {isOpen && children}
     </div>
   );
 }
@@ -144,24 +147,6 @@ function AnimeDetail({ selectedAnime }) {
           <em>{selectedAnime.synopsis}</em>
         </p>
       </section>
-    </div>
-  );
-}
-
-function ListBox({ animes, onSelectedAnime }) {
-  const [isOpen1, setIsOpen1] = useState(true);
-
-  return (
-    <div className="box">
-      <button
-        className="btn-toggle"
-        onClick={() => setIsOpen1((open) => !open)}
-      >
-        {isOpen1 ? '–' : '+'}
-      </button>
-      {isOpen1 && (
-        <AnimeList animes={animes} onSelectedAnime={onSelectedAnime} />
-      )}
     </div>
   );
 }
